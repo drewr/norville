@@ -11,5 +11,5 @@ You know... for proxy.
 
 ## License
 
-Copyright © 2012 Andrew A. Raines
+Copyright © 2012 Andrew A. Raines       
 Distributed under the Eclipse Public License.
