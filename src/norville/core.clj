@@ -1,44 +1,30 @@
 (ns norville.core
+  (:refer-clojure :exclude [proxy])
   (:require [ring.adapter.jetty :as jetty]
             [clj-http.client :as http]
             [clojure.java.io :as io]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [norville.middleware]))
 
 (def server (atom nil))
 
-(defn make-url [{:keys [host port uri scheme query-string]}]
-  (let [https ()]
-    (format "%s://%s:%s%s%s"
-            (or scheme "http")
-            host port (or uri "/")
-            (if query-string
-              (format "?%s" query-string)
-              ""))))
+(defn proxy [req]
+  (http/request req))
 
-(defn stringy-ring-req [{:keys [scheme server-name server-port
-                                uri query-string request-method]}]
-  (let [qs (if query-string (format "?%s" query-string) "")]
-    (format "%s %s://%s:%s%s%s"
-            (-> request-method name .toUpperCase)
-            scheme
-            server-name
-            server-port
-            uri
-            qs)))
-
-(defn stringy-clj-http-req [req]
-  (format "%s %s" (-> req :method name .toUpperCase) (:url req)))
+(defn resolve-handler [h]
+  (try
+    (let [[ns f] (.split (str h) "/")]
+      (require (symbol ns))
+      (resolve h))
+    (catch Exception e
+      (log/warn "could not load handler" h))))
 
 (defn make-proxy-handler [cfg]
-  (fn [srcreq]
-    (let [dstreq {:url (make-url (merge (:dst cfg)
-                                        (select-keys srcreq
-                                                     [:uri :query-string])))
-                  :method (:request-method srcreq)
-                  :body (:body srcreq)
-                  :throw-exceptions false}]
-      (log/info (stringy-ring-req srcreq) (stringy-clj-http-req dstreq))
-      (http/request dstreq))))
+  (fn [req]
+    (let [fns (concat (remove nil? (map resolve-handler (:handlers cfg)))
+                      [norville.middleware/wrap-make-request])
+          wrap-proxy (fn [pf] (reduce #(%2 %1) pf fns))]
+      ((wrap-proxy proxy) {:ring req :cfg cfg}))))
 
 (defn serve-config! [cfg]
   (when-not @server
