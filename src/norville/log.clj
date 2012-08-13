@@ -1,5 +1,7 @@
 (ns norville.log
-  [:require [clojure.tools.logging :as log]])
+  (:require [clojure.tools.logging :as log])
+  (:import (java.io FilterInputStream)
+           (org.apache.commons.io.input CountingInputStream)))
 
 (defn stringy-ring-req [{:keys [scheme server-name server-port
                                 uri query-string request-method]}]
@@ -24,3 +26,25 @@
 (defn wrap-debug [client]
   (fn [req]
     (client (assoc req :debug true :debug-body true))))
+
+(defn wrap-log-request-sizes
+  "Logs information about the request, with input (request) and output
+  (response) sizes without reading either of the streams."
+  [client]
+  (fn [req]
+    (let [c-req-stream (CountingInputStream. (:body req))
+          ;; replace the body's stream with the counted body stream
+          resp (client (assoc req :body c-req-stream))
+          c-resp-stream (CountingInputStream. (:body resp))
+          resp-s (proxy [FilterInputStream] [c-resp-stream]
+                   (close []
+                     (try
+                       (proxy-super close)
+                       (finally (log/infof "%s %s - %s [in/out: %s/%s]"
+                                           (.toUpperCase (name (:method req)))
+                                           (:url req)
+                                           (:status resp)
+                                           (.getByteCount c-req-stream)
+                                           (.getByteCount c-resp-stream))))))]
+      ;; and replace the response's :body stream with a counted stream
+      (assoc resp :body resp-s))))
