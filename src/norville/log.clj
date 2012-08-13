@@ -8,7 +8,7 @@
   (let [qs (if query-string (format "?%s" query-string) "")]
     (format "%s %s://%s:%s%s%s"
             (-> request-method name .toUpperCase)
-            scheme
+            (name scheme)
             server-name
             server-port
             uri
