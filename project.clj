@@ -6,7 +6,7 @@
   :dependencies [[log4j/log4j "1.2.17"]
                  [org.clojure/clojure "1.4.0"]
                  [ring/ring-jetty-adapter "1.1.1"]
-                 [clj-http "0.5.2"]
+                 [clj-http "0.5.3"]
                  [cheshire "4.0.1"]
                  [org.clojure/tools.logging "0.2.3"]]
   :main norville.core)
