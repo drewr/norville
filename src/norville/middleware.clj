@@ -17,5 +17,5 @@
                                                   [:uri :query-string])))
                         :method (-> req :ring :request-method)
                         :body (-> req :ring :body)
-                        :throw-exceptions false}))))
-
+                        :throw-exceptions false
+                        :as :stream}))))
