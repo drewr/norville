@@ -41,7 +41,7 @@
        (if-not cfg
          (throw (Exception. (format "can't find config [%s]" cfgname))))
        (let [m (-> cfg io/reader java.io.PushbackReader. read)]
-         (serve-config! (merge-with merge m overrides))))))
+         (serve-config! (merge m overrides))))))
 
 (defn stop! []
   (.stop @server))
