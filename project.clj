@@ -9,5 +9,6 @@
                  [clj-http "0.5.3"]
                  [cheshire "4.0.1"]
                  [org.clojure/tools.logging "0.2.3"]
-                 [commons-io "2.4"]]
+                 [commons-io "2.4"]
+                 [clout "1.1.0"]]
   :main norville.core)
