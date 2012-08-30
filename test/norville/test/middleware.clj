@@ -3,7 +3,6 @@
   (:use [norville.middleware] :reload))
 
 (deftest t-explode
-  (let [client (wrap-explode-uri (fn [req] req) :foo "/:bar/*")
-        expl (client {:ring {:uri "/blip/bop/1/2/3"}})]
-    (is (= (:foo expl)
-           {:* "bop/1/2/3", :bar "blip"}))))
+  (let [client (wrap-explode-uri (fn [req] req) :foo)
+        expl (client {:ring {:request-method :get :uri "/blip/bop/1"}})]
+    (is (= (:foo expl) {:id "1", :type "bop", :index "blip"}))))

@@ -10,5 +10,6 @@
                  [cheshire "4.0.1"]
                  [org.clojure/tools.logging "0.2.3"]
                  [commons-io "2.4"]
-                 [clout "1.1.0"]]
+                 [compojure "1.1.1"]
+                 [ring-mock "0.1.3"]]
   :main norville.core)

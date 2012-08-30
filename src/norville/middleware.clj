@@ -1,5 +1,5 @@
 (ns norville.middleware
-  (:require [clout.core :as clout]))
+  (:require [norville.routes :as routes]))
 
 (defn make-url [{:keys [host port uri scheme query-string]}]
   (let [https ()]
@@ -21,6 +21,7 @@
                         :throw-exceptions false
                         :as :stream}))))
 
-(defn wrap-explode-uri [client key pat]
+(defn wrap-explode-uri [client key]
   (fn [req]
-    (client (assoc req key (clout/route-matches pat (:ring req))))))
+    (client (assoc req key (routes/params (-> req :ring :request-method)
+                                          (-> req :ring :uri))))))
