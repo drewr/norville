@@ -14,13 +14,16 @@
 (defn resolve-handler [h]
   (try
     (let [[ns f] (.split (str h) "/")]
+      (log/debug "loading handler" (str h))
       (require (symbol ns))
       (resolve h))
     (catch Exception e
-      (log/warn "could not load handler" h))))
+      (log/warn "could not load handler" h)
+      (.printStackTrace e))))
 
 (defn make-proxy-handler [cfg]
   (fn [req]
+    (log/debug "making proxy handler")
     (let [fns (concat (remove nil? (map resolve-handler (:handlers cfg)))
                       [norville.middleware/wrap-make-request])
           wrap-proxy (fn [pf] (reduce #(%2 %1) pf fns))]
@@ -30,12 +33,14 @@
   (when-not @server
     (reset! server
             (jetty/run-jetty #((make-proxy-handler cfg) %)
-                             (merge {:join? false} (:src cfg))))))
+                             (merge {:join? false} (:src cfg)))))
+  (log/debug "norville started"))
 
 (defn serve!
   ([]
      (serve! {}))
   ([overrides]
+     (log/debug "starting norville")
      (let [cfgname (:config overrides "norville.clj")
            cfg (io/resource cfgname)]
        (if-not cfg
