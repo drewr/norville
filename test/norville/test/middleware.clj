@@ -19,6 +19,7 @@
   (is (t [:get  "/blip/_stats/get" ] {:index "blip"}))
   (is (t [:get  "/blip/bop"        ] nil))
   (is (t [:put  "/blip/bop/1"      ] {:index "blip", :type "bop", :id "1"}))
+  (is (t [:put  "/b/b/1"           ] {:index "b", :type "b", :id "1"}))
   (is (t [:post "/blip"            ] {:index "blip"}))
   (is (t [:put  "/blip"            ] {:index "blip"}))
   (is (t [:put  "/blip/_mapping"   ] {:index "blip"}))
