@@ -22,17 +22,17 @@
       (.printStackTrace e))))
 
 (defn make-proxy-handler [cfg]
-  (fn [req]
-    (log/debug "making proxy handler")
-    (let [fns (concat (remove nil? (map resolve-handler (:handlers cfg)))
-                      [norville.middleware/wrap-make-request])
-          wrap-proxy (fn [pf] (reduce #(%2 %1) pf fns))]
-      ((wrap-proxy proxy) {:ring req :cfg cfg}))))
+  (log/debug "making proxy handler")
+  (let [fns (concat (remove nil? (map resolve-handler (:handlers cfg)))
+                    [norville.middleware/wrap-make-request])
+        wrap-proxy (reduce #(%2 %1) proxy fns)]
+    (fn [req]
+      (wrap-proxy {:ring req :cfg cfg}))))
 
 (defn serve-config! [cfg]
   (when-not @server
     (reset! server
-            (jetty/run-jetty #((make-proxy-handler cfg) %)
+            (jetty/run-jetty (make-proxy-handler cfg)
                              (merge {:join? false} (:src cfg)))))
   (log/debug "norville started"))
 
