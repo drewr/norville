@@ -1,4 +1,4 @@
-(defproject norville "1.0.0"
+(defproject com.draines/norville "1.0.0"
   :description "Great Barrier Reef"
   :url "https://github.com/drewr/norville"
   :license {:name "Eclipse Public License"
