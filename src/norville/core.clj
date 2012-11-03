@@ -8,15 +8,21 @@
 
 (def server (atom nil))
 
+(def resolved-handlers (atom {}))
+
 (defn proxy [req]
   (http/request req))
 
 (defn resolve-handler [h]
   (try
     (let [[ns f] (.split (str h) "/")]
-      (log/debug "loading handler" (str h))
-      (require (symbol ns))
-      (resolve h))
+      (if-let [handler (get @resolved-handlers h)]
+        handler
+        (do
+          (log/debug "loading handler" (str h))
+          (require (symbol ns))
+          (swap! resolved-handlers assoc h (resolve h))
+          (get @resolved-handlers h))))
     (catch Exception e
       (log/warn "could not load handler" h)
       (.printStackTrace e))))
