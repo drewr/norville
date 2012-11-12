@@ -9,7 +9,7 @@
 (def server (atom nil))
 
 (defn proxy [req]
-  (http/request req))
+  (http/request (assoc req :decompress-body false)))
 
 (defn resolve-handler [h]
   (try
