@@ -35,16 +35,17 @@
     (let [c-req-stream (CountingInputStream. (:body req))
           ;; replace the body's stream with the counted body stream
           resp (client (assoc req :body c-req-stream))
-          c-resp-stream (CountingInputStream. (:body resp))
-          resp-s (proxy [FilterInputStream] [c-resp-stream]
-                   (close []
-                     (try
-                       (proxy-super close)
-                       (finally (log/infof "%s %s - %s [in/out: %s/%s]"
-                                           (.toUpperCase (name (:method req)))
-                                           (:url req)
-                                           (:status resp)
-                                           (.getByteCount c-req-stream)
-                                           (.getByteCount c-resp-stream))))))]
+          c-resp-stream (when (:body resp) (CountingInputStream. (:body resp)))
+          resp-s (when (:body resp)
+                   (proxy [FilterInputStream] [c-resp-stream]
+                     (close []
+                       (try
+                         (proxy-super close)
+                         (finally (log/infof "%s %s - %s [in/out: %s/%s]"
+                                             (.toUpperCase (name (:method req)))
+                                             (:url req)
+                                             (:status resp)
+                                             (.getByteCount c-req-stream)
+                                             (.getByteCount c-resp-stream)))))))]
       ;; and replace the response's :body stream with a counted stream
       (assoc resp :body resp-s))))
