@@ -18,6 +18,11 @@
                                                   [:uri :query-string])))
                         :method (-> req :ring :request-method)
                         :body (-> req :ring :body)
+                        :headers (select-keys (-> req :ring :headers)
+                                              ["authorization"
+                                               "accept"
+                                               "accept-encoding"
+                                               "user-agent"])
                         :throw-exceptions false
                         :as :stream}))))
 
