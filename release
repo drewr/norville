@@ -1,0 +1,33 @@
+#!/bin/zsh
+
+# Release HEAD as RELVER and bump repo to NEXTVER.
+#
+#     ./release 1.0.1 1.0.2-SNAPSHOT
+#
+
+VER=$1
+NEXT=$2
+
+artifact=com.draines/norville
+
+if [[ -z $VER || -z $NEXT ]]; then
+   echo $0 RELVER NEXTVER
+   exit 1
+fi
+
+movever () {
+  local new=$1
+  perl -pi -e \
+    "s,$artifact \"[^\\\"]*\",$artifact \"$new\"," \
+    project.clj   
+}
+
+movever $VER
+git commit -a -m "Release $VER."
+git tag -am $VER $VER
+
+movever $NEXT
+git commit -a -m "Bump $NEXT."
+
+echo released $VER
+echo 'ready for git push && git push --tags'
