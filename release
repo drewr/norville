@@ -23,6 +23,7 @@ movever () {
 }
 
 movever $VER
+lein jar
 git commit -a -m "Release $VER."
 git tag -am $VER $VER
 
@@ -30,4 +31,4 @@ movever $NEXT
 git commit -a -m "Bump $NEXT."
 
 echo released $VER
-echo 'ready for git push && git push --tags'
+echo 'ready for git push && git push --tags && lein deploy'
